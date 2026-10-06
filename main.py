@@ -1,92 +1,201 @@
 import random
-suits = ['Spades','Clubs','Hearts','Diamonds']
-ranks = ['A', 'K', 'Q', 'J','2', '3', '4' , '5', '6', '7', '8', '9', '10']
-#cardsV1 = []
-cards = []
-threshold = 21
 
-#for rank in ranks:
-#    for suit in suits:
-#        cardsV1.append(suit + " of " + rank )
+class Card:
+    def __init__(self, suit, rank):
+        self.suit = suit
+        self.rank = rank
 
-for rank in ranks:
-    for suit in suits:
-        cards.append([suit , rank])
+    def __str__(self):
+        return f"{self.rank['rank']} of {self.suit}"
 
-#print(cardsV1)
-#print("Number of cards in the deck are ", len(cardsV1))
-print(cards)
-print("Number of cards in the deck are ", len(cards))
-
-def shuffle(self):
-    random.shuffle(self)
-
-def deal(number):
-    cards_dealt = []
-    for i in range(number):
-        cards_dealt.append(cards.pop())
-    return cards_dealt
     
+class Deck:
+    def __init__(self):
+        self.cards = []
+        suits = ["spades", "clubs", "hearts", "diamonds"]
+        ranks = [
+                {"rank": "A", "value": 11},
+                {"rank": "2", "value": 2},
+                {"rank": "3", "value": 3},
+                {"rank": "4", "value": 4},
+                {"rank": "5", "value": 5},
+                {"rank": "6", "value": 6},
+                {"rank": "7", "value": 7},
+                {"rank": "8", "value": 8},
+                {"rank": "9", "value": 9},
+                {"rank": "10", "value": 10},
+                {"rank": "J", "value": 10},
+                {"rank": "Q", "value": 10},
+                {"rank": "K", "value": 10},
+            ]
+        
+        for suit in suits:
+            for rank in ranks:
+                #self.cards.append([suit, rank])
+                self.cards.append(Card(suit, rank))
+                
 
-shuffle(cards)
-print("shuffled deck =" ,cards)
-cards_dealt = deal(2)
-print("\n the cards dealt are ", cards_dealt)
+    def shuffle(self):
+        if len(self.cards) > 1:
+            random.shuffle(self.cards)
 
-card1 = cards_dealt[0]
-card2 = cards_dealt[1]
+    def deal(self, number=1):
+        cards_delt = []
+        for x in range(number):
+            if len(self.cards) > 0:
+                cards_delt.append(self.cards.pop())
+        return cards_delt
 
-face1 = card1[0]
-value1 = card1[1]
+#deck1 = Deck()
+#deck1.shuffle()
+#card_delt_1 = deck1.deal(1)
+#print(card_delt_1)
+#cards = deck1.cards
+#print(cards[0])
+#for c in cards:
+    #print(c)
 
-face2 = card2[0]
-value2 = card2[1]
-calculatedvalue1 = 0
-calculatedvalue2 = 0
-if value1 == "A":
-    calculatedvalue1 = 11
-elif value1 == "K" or value1 == "Q" or value1 == "J":
-    calculatedvalue1 = 10
-else:
-    calculatedvalue1 = value1
-if value2 == "A":
-    calculatedvalue2 = 11
-elif value2 == "K" or value2 == "Q" or value2 == "J":
-    calculatedvalue2 = 10    
-else:
-    calculatedvalue2 = value2
+class Hand:
+    def __init__(self, dealer=False):
+        self.cards = []
+        self.value = 0
+        self.dealer = dealer
+
+    def add_card(self, card_list):
+        self.cards.extend(card_list)
+
+    def calculate_value(self):
+        self.value = 0
+        has_ace = False
+
+        for card in self.cards:
+            card_value = int(card.rank["value"])
+            self.value += card_value
+            if card.rank["rank"] == "A":
+                has_ace = True
+
+        # While total is over 21 and we have an Ace counted as 11, reduce it
+        while self.value > 21 and has_ace:
+            self.value -= 10
+            has_ace = False  # Or count total aces if holding multiple Aces
+
+    def get_value(self):
+        self.calculate_value()
+        return self.value
+
+    def is_blackjack(self):
+        return self.get_value() == 21
+
+    def display(self, show_all_dealer_cards=False):
+        print(f'''{"Dealer's" if self.dealer else "Your"} hand:''')
+        for index, card in enumerate(self.cards):
+            if index == 0 and self.dealer and not show_all_dealer_cards and not self.is_blackjack():
+                print("hidden")
+            else:
+                print(card)
+
+        if not self.dealer:
+            print("Value:", self.get_value())
+        print()
 
 
-calculated_rank_dict_1 ={"value" :value1, "calculation" : calculatedvalue1}
-calculated_rank_dict_2 ={"value" :value2, "calculation" : calculatedvalue2}
+class Game:
+    def play(self):
+        game_number = 0
+        games_to_play = 0
+
+        while games_to_play <= 0:
+            try:
+                games_to_play = int(input("How many games do you want to play?: "))
+            except:
+                print("You must enter a number.")
+
+        while game_number < games_to_play:
+            game_number += 1
+
+            deck = Deck()
+            deck.shuffle()
+
+            player_hand = Hand()
+            dealer_hand = Hand(dealer=True)
+
+            for i in range(2):
+                player_hand.add_card(deck.deal())
+                dealer_hand.add_card(deck.deal())
+
+            print()
+            print("*" * 30)
+            print(f"Game {game_number} of {games_to_play}")
+            print("*" * 30)
+            player_hand.display()
+            dealer_hand.display()
+
+            if self.check_winner(player_hand, dealer_hand):
+                continue
+
+            choice = ""
+            while choice not in ["s", "stand"] and player_hand.get_value() < 21:
+                choice = input("Please choose 'Hit' or 'Stand': ").lower()
+                print()
+                while choice not in ["h", "s", "hit", "stand"]:
+                    choice = input("Please enter 'Hit' or 'Stand' (or H/S) ").lower()
+                    print()
+                if choice in ["hit", "h"]:
+                    player_hand.add_card(deck.deal())
+                    player_hand.display()
+
+            if self.check_winner(player_hand, dealer_hand):
+                continue
+
+            player_hand_value = player_hand.get_value()
+            dealer_hand_value = dealer_hand.get_value()
 
 
-print( value1,calculatedvalue1)
-print( value2,calculatedvalue2)
+            while dealer_hand_value < 17:
+                dealer_hand.add_card(deck.deal())
+                dealer_hand_value = dealer_hand.get_value()
 
-total1 = calculatedvalue1 + calculatedvalue2
+            dealer_hand.display(show_all_dealer_cards=True)
 
-if total1 >= 21:
-    print("you lost value exceeds 21", total1)
+            if self.check_winner(player_hand, dealer_hand):
+                continue 
 
-ask = print( input("do you wish to add another card y/n?")) 
+            print("Final Results")
+            print("Your hand:", player_hand_value)
+            print("Dealer's hand:", dealer_hand_value)
 
-if ask == "Y":
-    added_card = deal(1)
+            self.check_winner(player_hand, dealer_hand, True)
+            
+        print("\nThanks for playing!")
 
+    def check_winner(self, player_hand, dealer_hand, game_over=False):
+        if not game_over:
+            if player_hand.get_value() > 21:
+                print("You busted. Dealer wins! 😭")
+                return True
+            elif dealer_hand.get_value() > 21:
+                print("Dealer busted. You win! 😄")
+                return True
+            elif player_hand.is_blackjack() and dealer_hand.is_blackjack():
+                print("Both players have blackjack! Tie! 🤨")
+                return True
+            elif player_hand.is_blackjack():
+                print("You have blackjack! You win! 😄")
+                return True
+            elif dealer_hand.is_blackjack():
+                print("Dealer has blackjack! Dealer wins! 😭")
+                return True
+        else:
+            if player_hand.get_value() > dealer_hand.get_value():
+                print("You win! 😄")
+            elif player_hand.get_value() == dealer_hand.get_value():
+                print("Tie! 🤨")
+            else:
+                print("Dealer wins! 😭")
 
+            return True
 
+        return False
 
-#print(card1, card2)
-
-#suit = suits[2]
-
-#rank = "K"
-#value = 10
-#suits.append("snakes")
-
-#print("Your card is : "+ rank + " of " + suit)
-
-#for suit in suits:
-#    print(suit)
-
+g = Game()
+g.play()
