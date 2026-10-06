@@ -6,7 +6,7 @@ class Card:
         self.rank = rank
 
     def __str__(self):
-        return f"{self.rank['rank']} of {self.suit}"
+        return f"{self.rank['rank']} with value {self.rank['value']} of {self.suit}"
 
     
 class Deck:
@@ -46,10 +46,7 @@ class Deck:
                 cards_delt.append(self.cards.pop())
         return cards_delt
 
-#deck1 = Deck()
-#deck1.shuffle()
-#card_delt_1 = deck1.deal(1)
-#print(card_delt_1)
+
 #cards = deck1.cards
 #print(cards[0])
 #for c in cards:
@@ -171,31 +168,40 @@ class Game:
     def check_winner(self, player_hand, dealer_hand, game_over=False):
         if not game_over:
             if player_hand.get_value() > 21:
-                print("You busted. Dealer wins! 😭")
+                print("You busted. Dealer wins! T_T")
                 return True
             elif dealer_hand.get_value() > 21:
-                print("Dealer busted. You win! 😄")
+                print("Dealer busted. You win! =D")
                 return True
             elif player_hand.is_blackjack() and dealer_hand.is_blackjack():
-                print("Both players have blackjack! Tie! 🤨")
+                print("Both players have blackjack! Tie! =O")
                 return True
             elif player_hand.is_blackjack():
-                print("You have blackjack! You win! 😄")
+                print("You have blackjack! You win! =D")
                 return True
             elif dealer_hand.is_blackjack():
-                print("Dealer has blackjack! Dealer wins! 😭")
+                print("Dealer has blackjack! Dealer wins! T_T")
                 return True
         else:
             if player_hand.get_value() > dealer_hand.get_value():
-                print("You win! 😄")
+                print("You win! =D")
             elif player_hand.get_value() == dealer_hand.get_value():
-                print("Tie! 🤨")
+                print("Tie! =O")
             else:
-                print("Dealer wins! 😭")
+                print("Dealer wins! T_T")
 
             return True
 
         return False
+
+#deck1 = Deck()
+#deck1.shuffle()
+##for i in deck1.cards:
+#    print(i)
+#card_delt_1 = deck1.deal(3)
+#for i in card_delt_1:
+#    print(i)
+
 
 g = Game()
 g.play()
